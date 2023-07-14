@@ -71,7 +71,7 @@ jobs:
         run: web-ext build
 
       - name: Renaming Firefox package
-        run: mv web-ext-artifacts/*.zip tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip
+        run: mv web-ext-artifacts/*.zip /tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip
 
       - name: Adapt manifest.json to work with Chrome
         run: |
@@ -87,7 +87,7 @@ jobs:
         run: web-ext build
 
       - name: Renaming Chrome package
-        run: mv web-ext-artifacts/*.zip tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip
+        run: mv web-ext-artifacts/*.zip /tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip
 
       - name: Uploading Firefox artifact
         id: upload_artifact
