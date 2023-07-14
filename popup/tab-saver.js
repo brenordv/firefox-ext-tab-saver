@@ -80,8 +80,7 @@ function preparePayloadToSave(markdownContent) {
     const blob = new Blob([markdownContent], {type: 'text/markdown'});
 
     // Create a URL for the Blob
-    const blobUrl = URL.createObjectURL(blob);
-    return blobUrl;
+    return URL.createObjectURL(blob);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
