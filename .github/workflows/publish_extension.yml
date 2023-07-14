@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install --global web-ext
+
+      - name: Run web-ext lint
+        run: web-ext lint
+
+      - name: Get version
+        id: version
+        run: echo "::set-output name=VERSION::$(jq -r '.version' src/manifest.json)"
+        shell: bash
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.VERSION }}" >/dev/null 2>&1; then
+            echo "::set-output name=EXISTS::true"
+          else
+            echo "::set-output name=EXISTS::false"
+          fi
+        shell: bash
+
+      - name: Create tag
+        if: steps.check_tag.outputs.EXISTS == 'false'
+        run: git tag "v${{ steps.version.outputs.VERSION }}"
+
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.EXISTS == 'false'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          release_name: Release v${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Package extension
+        run: web-ext build -s src
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: extension
+          path: web-ext-artifacts/*.zip
+
+# Testing the pipeline first. Will do the publishing later.
+#      - name: Publish to Mozilla Addons
+#        if: steps.check_tag.outputs.EXISTS == 'false'
+#        uses: RobbieGM/addon-action@v1
+#        with:
+#          zip: web-ext-artifacts/*.zip
+#          guid: your-addon-guid@mozilla.org
+#          xpi: name-of-the-addon.xpi
+#        env:
+#          FIREFOX_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
+#          FIREFOX_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}

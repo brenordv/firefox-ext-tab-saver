@@ -1,17 +1,14 @@
 {
   "manifest_version": 2,
   "name": "Tab Saver",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "Export your open tabs into a markdown file.",
-  "permissions": ["tabs", "<all_urls>", "downloads"],
+  "permissions": ["tabs", "downloads"],
   "content_security_policy": "script-src 'self'; object-src 'self' blob:;",
   "browser_action": {
     "default_icon": {
       "48": "icons/tab-saver-48.png"
     },
     "default_popup": "popup/tab-saver.html"
-  },
-  "background": {
-    "scripts": ["background.js"]
   }
 }
