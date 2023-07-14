@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Tab Saver",
   "version": "1.0.2",
-  "description": "\"Tab Saver\" is a minimalist Firefox extension, designed for easy saving and managing of browser tabs. It allows two-clicks saving of all tabs, options for describing sessions, and ensures user privacy. It's the essential tool for organized browsing.",
+  "description": "Tab Saver is a minimalist extension, for easily saving active tabs.",
   "permissions": ["tabs", "downloads"],
   "action": {
     "default_icon": {
