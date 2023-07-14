@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Tab Saver",
   "version": "1.0.1",
-  "description": "Export your open tabs into a markdown file.",
+  "description": "\"Tab Saver\" is a minimalist Firefox extension, designed for easy saving and managing of browser tabs. It allows two-clicks saving of all tabs, options for describing sessions, and ensures user privacy. It's the essential tool for organized browsing.",
   "permissions": ["tabs", "downloads"],
   "browser_action": {
     "default_icon": {
