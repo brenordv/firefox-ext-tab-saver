@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: "tab_saver-${{ needs.prepare.outputs.version }}"
-          path: "tab_saver-${{ needs.prepare.outputs.version }}.zip"
+          path: "web-ext-artifacts/tab_saver-${{ needs.prepare.outputs.version }}.zip"
           if-no-files-found: error
 
   release-github:
