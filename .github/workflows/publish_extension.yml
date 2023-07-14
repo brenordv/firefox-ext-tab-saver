@@ -44,8 +44,10 @@ jobs:
         id: check_tag
         run: |
           if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} exists."
             echo "EXISTS=true" >> $GITHUB_ENV
           else
+            echo "Tag v${VERSION} does not exist."
             echo "EXISTS=false" >> $GITHUB_ENV
           fi
 
