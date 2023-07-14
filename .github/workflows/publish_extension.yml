@@ -27,7 +27,18 @@ jobs:
 
       - name: Get version
         id: version
-        run: echo "::set-output name=VERSION::$(jq -r '.version' src/manifest.json)"
+        run: echo "::set-output name=VERSION::$(jq -r '.version' manifest.json)"
+        shell: bash
+
+      - name: Check version
+        id: check_version
+        run: |
+          if [ -z "${{ steps.version.outputs.VERSION }}" ]; then
+            echo "VERSION is not set, failing the build."
+            exit 1
+          else
+            echo "VERSION is set to ${{ steps.version.outputs.VERSION }}"
+          fi
         shell: bash
 
       - name: Check if tag exists
@@ -52,7 +63,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
-          release_name: Release v${{ steps.version.outputs.VERSION }}
+          release_name: v${{ steps.version.outputs.VERSION }}
           draft: false
           prerelease: false
 
