@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: node:16
-    outputs:
-      version: ${{ steps.get_version.outputs.VERSION }}
-      tag_exists: ${{ steps.check_tag.outputs.EXISTS }}
 
     steps:
       - name: Checkout code
@@ -50,6 +47,10 @@ jobs:
             echo "Tag v${VERSION} does not exist."
             echo "EXISTS=false" >> $GITHUB_ENV
           fi
+
+    outputs:
+      version: ${{ env.VERSION }}
+      tag_exists: ${{ env.EXISTS }}
 
   release:
     needs: prepare
