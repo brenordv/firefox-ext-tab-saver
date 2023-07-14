@@ -30,6 +30,17 @@ jobs:
         run: echo "::set-output name=VERSION::$(jq -r '.version' manifest.json)"
         shell: bash
 
+      - name: Check version
+        id: check_version
+        run: |
+          if [ -z "${{ steps.version.outputs.VERSION }}" ]; then
+            echo "VERSION is not set, failing the build."
+            exit 1
+          else
+            echo "VERSION is set to ${{ steps.version.outputs.VERSION }}"
+          fi
+        shell: bash
+
       - name: Check if tag exists
         id: check_tag
         run: |
