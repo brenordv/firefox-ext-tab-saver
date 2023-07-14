@@ -8,6 +8,8 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    container:
+      image: node:16
     outputs:
       version: ${{ steps.get_version.outputs.VERSION }}
       tag_exists: ${{ steps.check_tag.outputs.EXISTS }}
@@ -39,8 +41,10 @@ jobs:
         run: |
           echo 'EXISTS<<EOF' >> $GITHUB_ENV
           if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} exists. Skipping release."
             echo true >> $GITHUB_ENV
           else
+            echo "Tag v${VERSION} is not set. Proceeding with release."
             echo false >> $GITHUB_ENV
           fi
           echo 'EOF' >> $GITHUB_ENV
