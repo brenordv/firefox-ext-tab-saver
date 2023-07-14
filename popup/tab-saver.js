@@ -1,3 +1,14 @@
+let browserOps = null;
+
+const getBrowserOps = () => {
+    if (browserOps) return browserOps;
+
+    // If chrome exists, I'm assuming it's running on Chrome, otherwise is Firefox.
+    browserOps = chrome ? chrome : browser;
+
+    return browserOps;
+}
+
 const removeLineBreaks = (text) => {
     return text.replace(/(\r\n|\n|\r)/gm, '');
 }
@@ -6,8 +17,7 @@ const getTabs = async (allWindows) => {
     // Define the config for the tabs query
     const config = allWindows ? {} : {currentWindow: true};
 
-    // Get all tabs in the current window or all windows
-    return await browser.tabs.query(config);
+    return await getBrowserOps().tabs.query(config);
 };
 
 const generateFilename = () => {
@@ -102,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const blobUrl = preparePayloadToSave(markdownContent);
 
             // Save the markdown file
-            browser.downloads.download({
+            getBrowserOps().downloads.download({
                 url: blobUrl,
                 filename: filename,
                 saveAs: false

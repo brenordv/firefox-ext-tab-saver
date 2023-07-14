@@ -67,15 +67,42 @@ jobs:
       - name: Install web-ext
         run: npm install --global web-ext
 
-      - name: Package extension
+      - name: Package extension for Firefox
         run: web-ext build
 
-      - name: Uploading artifact
+      - name: Renaming Firefox package
+        run: mv web-ext-artifacts/*.zip tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip
+
+      - name: Adapt manifest.json to work with Chrome
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = './manifest.json';
+            const manifest = JSON.parse(fs.readFileSync(path, 'utf8'));
+            delete manifest.browser_specific_settings;
+            fs.writeFileSync(path, JSON.stringify(manifest, null, 2));
+          "
+
+      - name: Package extension for Chrome
+        run: web-ext build
+
+      - name: Renaming Chrome package
+        run: mv web-ext-artifacts/*.zip tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip
+
+      - name: Uploading Firefox artifact
         id: upload_artifact
         uses: actions/upload-artifact@v3
         with:
-          name: "tab_saver-${{ needs.prepare.outputs.version }}"
-          path: "web-ext-artifacts/tab_saver-${{ needs.prepare.outputs.version }}.zip"
+          name: "tab_saver__firefox-${{ needs.prepare.outputs.version }}"
+          path: "tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip"
+          if-no-files-found: error
+
+      - name: Uploading Chrome artifact
+        id: upload_artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: "tab_saver__chrome-${{ needs.prepare.outputs.version }}"
+          path: "tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip"
           if-no-files-found: error
 
   release-github:
@@ -97,10 +124,15 @@ jobs:
           git tag ${{ needs.prepare.outputs.version }}
           git push origin ${{ needs.prepare.outputs.version }}
 
-      - name: Downloading artifact
+      - name: Downloading artifact - Firefox
         uses: actions/download-artifact@v3
         with:
-          name: "tab_saver-${{ needs.prepare.outputs.version }}"
+          name: "tab_saver__firefox-${{ needs.prepare.outputs.version }}"
+
+      - name: Downloading artifact - Chrome
+        uses: actions/download-artifact@v3
+        with:
+          name: "tab_saver__chrome-${{ needs.prepare.outputs.version }}"
 
       - name: Create Release
         id: create_release
@@ -113,33 +145,35 @@ jobs:
           draft: false
           prerelease: false
           fail_on_unmatched_files: true
-          files: "tab_saver-${{ needs.prepare.outputs.version }}.zip"
+          files: | 
+            "tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip"
+            "tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip"
 
 
-  release-firefox:
-    needs: [artifacts, prepare]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Downloading artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: "tab_saver-${{ needs.prepare.outputs.version }}"
-
-      - name: Deploy to Firefox Addons
-        id: addonsDeploy
-        uses: cardinalby/webext-buildtools-firefox-addons-action@v1
-        continue-on-error: true
-        with:
-          zipFilePath: tab_saver-${{ needs.prepare.outputs.version }}.zip
-          extensionId: ${{ secrets.FF_EXTENSION_ID }}
-          jwtIssuer: ${{ secrets.FIREFOX_API_KEY }}
-          jwtSecret: ${{ secrets.FIREFOX_API_SECRET }}
-
-      - name: Abort on upload error
-        if: |
-          steps.addonsDeploy.outcome == 'failure' &&
-          steps.addonsDeploy.outputs.sameVersionAlreadyUploadedError != 'true'
-        run: exit 1
+#  release-firefox:
+#    needs: [artifacts, prepare]
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: read
+#
+#    steps:
+#      - name: Downloading artifact
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: "tab_saver__firefox-${{ needs.prepare.outputs.version }}"
+#
+#      - name: Deploy to Firefox Addons
+#        id: addonsDeploy
+#        uses: cardinalby/webext-buildtools-firefox-addons-action@v1
+#        continue-on-error: true
+#        with:
+#          zipFilePath: tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip
+#          extensionId: ${{ secrets.FF_EXTENSION_ID }}
+#          jwtIssuer: ${{ secrets.FIREFOX_API_KEY }}
+#          jwtSecret: ${{ secrets.FIREFOX_API_SECRET }}
+#
+#      - name: Abort on upload error
+#        if: |
+#          steps.addonsDeploy.outcome == 'failure' &&
+#          steps.addonsDeploy.outputs.sameVersionAlreadyUploadedError != 'true'
+#        run: exit 1
