@@ -128,11 +128,18 @@ jobs:
         with:
           name: "tab_saver-${{ needs.prepare.outputs.version }}"
 
-      - name: Publish to Firefox Add-ons
-        uses: RobbieGM/addon-action@v1
+      - name: Deploy to Firefox Addons
+        id: addonsDeploy
+        uses: cardinalby/webext-buildtools-firefox-addons-action@v1
+        continue-on-error: true
         with:
-          zip: tab_saver-${{ needs.prepare.outputs.version }}.zip
-          id: ${{ secrets.ADD_ON_ID }}
-          version: ${{ needs.prepare.outputs.version }}
-          jwt_issuer: ${{ secrets.FIREFOX_API_KEY }}
-          jwt_secret: ${{ secrets.FIREFOX_API_SECRET }}
+          zipFilePath: tab_saver-${{ needs.prepare.outputs.version }}.zip
+          extensionId: ${{ secrets.FF_EXTENSION_ID }}
+          jwtIssuer: ${{ secrets.FIREFOX_API_KEY }}
+          jwtSecret: ${{ secrets.FIREFOX_API_SECRET }}
+
+      - name: Abort on upload error
+        if: |
+          steps.addonsDeploy.outcome == 'failure' &&
+          steps.addonsDeploy.outputs.sameVersionAlreadyUploadedError != 'true'
+        run: exit 1
