@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
 
@@ -40,11 +40,11 @@ jobs:
       - name: Check if tag exists
         id: check_tag
         run: |
-          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
-            echo "Tag v${VERSION} exists."
+          if git rev-parse "${VERSION}" >/dev/null 2>&1; then
+            echo "Tag ${VERSION} exists."
             echo "EXISTS=true" >> $GITHUB_ENV
           else
-            echo "Tag v${VERSION} does not exist."
+            echo "Tag ${VERSION} does not exist."
             echo "EXISTS=false" >> $GITHUB_ENV
           fi
 
@@ -52,46 +52,69 @@ jobs:
       version: ${{ env.VERSION }}
       tag_exists: ${{ env.EXISTS }}
 
-  release:
+  artifacts:
     needs: prepare
     if: needs.prepare.outputs.tag_exists == 'false'
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create tag
-        run: git tag "v${{ needs.prepare.outputs.version }}"
-
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ needs.prepare.outputs.version }}
-          release_name: v${{ needs.prepare.outputs.version }}
-          draft: false
-          prerelease: false
-
-  build:
-    needs: release
-    runs-on: ubuntu-latest
-    container:
-      image: node:16
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Install web-ext
+        run: npm install --global web-ext
 
       - name: Package extension
         run: web-ext build
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+      - name: Uploading artifact
+        id: upload_artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: extension
-          path: web-ext-artifacts/*.zip
+          name: "tab_saver-${{ needs.prepare.outputs.version }}"
+          path: "tab_saver-${{ needs.prepare.outputs.version }}.zip"
+          if-no-files-found: error
+
+  release-github:
+    needs: artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Create Tag
+        run: |
+          git tag ${{ needs.prepare.outputs.version }}
+          git push origin ${{ needs.prepare.outputs.version }}
+
+      - name: Downloading artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: "tab_saver-${{ needs.prepare.outputs.version }}"
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.prepare.outputs.version }}
+          name: ${{ needs.prepare.outputs.version }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: "tab_saver-${{ needs.prepare.outputs.version }}.zip"
+
 
 #  publish:
 #    needs: build
@@ -99,7 +122,7 @@ jobs:
 #
 #    steps:
 #      - name: Checkout code
-#        uses: actions/checkout@v2
+#        uses: actions/checkout@v3
 #
 #      - name: Publish to Firefox Add-ons
 #        uses: RobbieGM/addon-action@v1
