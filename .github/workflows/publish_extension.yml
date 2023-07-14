@@ -93,16 +93,10 @@ jobs:
         id: upload_artifact
         uses: actions/upload-artifact@v3
         with:
-          name: "tab_saver__firefox-${{ needs.prepare.outputs.version }}"
-          path: "tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip"
-          if-no-files-found: error
-
-      - name: Uploading Chrome artifact
-        id: upload_artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: "tab_saver__chrome-${{ needs.prepare.outputs.version }}"
-          path: "tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip"
+          name: "tab_saver-${{ needs.prepare.outputs.version }}"
+          path: |
+            "tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip"
+            "tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip"
           if-no-files-found: error
 
   release-github:
@@ -124,15 +118,10 @@ jobs:
           git tag ${{ needs.prepare.outputs.version }}
           git push origin ${{ needs.prepare.outputs.version }}
 
-      - name: Downloading artifact - Firefox
+      - name: Downloading artifacts
         uses: actions/download-artifact@v3
         with:
-          name: "tab_saver__firefox-${{ needs.prepare.outputs.version }}"
-
-      - name: Downloading artifact - Chrome
-        uses: actions/download-artifact@v3
-        with:
-          name: "tab_saver__chrome-${{ needs.prepare.outputs.version }}"
+          name: "tab_saver-${{ needs.prepare.outputs.version }}"
 
       - name: Create Release
         id: create_release
@@ -160,7 +149,7 @@ jobs:
 #      - name: Downloading artifact
 #        uses: actions/download-artifact@v3
 #        with:
-#          name: "tab_saver__firefox-${{ needs.prepare.outputs.version }}"
+#          name: "tab_saver-${{ needs.prepare.outputs.version }}"
 #
 #      - name: Deploy to Firefox Addons
 #        id: addonsDeploy
