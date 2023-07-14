@@ -90,7 +90,9 @@ jobs:
         run: mv web-ext-artifacts/*.zip ./tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip
 
       - name: Where Am I? What is going on?
-        run: ls -la
+        run: |
+          pwd
+          ls -la
 
       - name: Uploading Firefox artifact
         id: upload_artifact
@@ -98,8 +100,8 @@ jobs:
         with:
           name: "tab_saver-${{ needs.prepare.outputs.version }}"
           path: |
-            "tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip"
-            "tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip"
+            tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip
+            tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip
           if-no-files-found: error
 
   release-github:
