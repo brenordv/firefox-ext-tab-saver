@@ -14,6 +14,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install --global web-ext
+
+      - name: Run web-ext lint
+        run: web-ext lint
+
       - name: Get version
         id: version
         run: echo "::set-output name=VERSION::$(jq -r '.version' src/manifest.json)"
