@@ -98,8 +98,8 @@ jobs:
         with:
           name: "tab_saver-${{ needs.prepare.outputs.version }}"
           path: |
-            "./tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip"
-            "./tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip"
+            "tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip"
+            "tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip"
           if-no-files-found: error
 
   release-github:
