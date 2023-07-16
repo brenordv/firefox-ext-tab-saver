@@ -6,6 +6,15 @@ That's why I created this extension: As a way to save all those tabs in a text f
 Unless you click on it, this extension won't do anything, and it does not collect any data whatsoever. This is free and 
 open source software, so feel free to check the code and make sure it's safe.
 
+
+# Stores
+## Chrome
+https://chrome.google.com/webstore/detail/tab-saver/nhdplnlmhiochoniiiljegmipgplgppe
+
+## Firefox
+https://addons.mozilla.org/en-US/firefox/addon/raccoon-ninja-tab-saver/
+
+
 # Permissions
 These permissions in the context of a browser extension have the following meanings:
 
