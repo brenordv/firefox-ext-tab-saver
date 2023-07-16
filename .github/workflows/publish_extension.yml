@@ -139,33 +139,33 @@ jobs:
             tab_saver__chrome-${{ needs.prepare.outputs.version }}.zip
 
 
-#  release-firefox:
-#    needs: [artifacts, prepare]
-#    runs-on: ubuntu-latest
-#    permissions:
-#      contents: read
-#
-#    steps:
-#      - name: Downloading artifact
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: "tab_saver-${{ needs.prepare.outputs.version }}"
-#
-#      - name: Deploy to Firefox Addons
-#        id: addonsDeploy
-#        uses: cardinalby/webext-buildtools-firefox-addons-action@v1
-#        continue-on-error: true
-#        with:
-#          zipFilePath: tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip
-#          extensionId: ${{ secrets.FF_EXTENSION_ID }}
-#          jwtIssuer: ${{ secrets.FIREFOX_API_KEY }}
-#          jwtSecret: ${{ secrets.FIREFOX_API_SECRET }}
-#
-#      - name: Abort on upload error
-#        if: |
-#          steps.addonsDeploy.outcome == 'failure' &&
-#          steps.addonsDeploy.outputs.sameVersionAlreadyUploadedError != 'true'
-#        run: exit 1
+  release-firefox:
+    needs: [artifacts, prepare]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Downloading artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: "tab_saver-${{ needs.prepare.outputs.version }}"
+
+      - name: Deploy to Firefox Addons
+        id: addonsDeploy
+        uses: cardinalby/webext-buildtools-firefox-addons-action@v1
+        continue-on-error: true
+        with:
+          zipFilePath: tab_saver__firefox-${{ needs.prepare.outputs.version }}.zip
+          extensionId: ${{ secrets.FF_EXTENSION_ID }}
+          jwtIssuer: ${{ secrets.FIREFOX_API_KEY }}
+          jwtSecret: ${{ secrets.FIREFOX_API_SECRET }}
+
+      - name: Abort on upload error
+        if: |
+          steps.addonsDeploy.outcome == 'failure' &&
+          steps.addonsDeploy.outputs.sameVersionAlreadyUploadedError != 'true'
+        run: exit 1
 
   release-chrome:
     needs: [artifacts, prepare]
@@ -187,4 +187,3 @@ jobs:
           client-id: ${{ secrets.CHROME_CLIENT_ID }}
           client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
           refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          publish: false  # For now, just testing.
